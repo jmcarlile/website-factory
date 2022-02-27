@@ -1,0 +1,431 @@
+WEBSITE DEPLOYMENT
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------
+GSUTIL GENERAL
+
+acronyms:
+	CE		compute engine
+	DLVM	deep learning VM
+
+one-time setup GCP SDK:
+- install per os
+- run gcloud init
+- login on the website to associate the account
+
+new credentials for cloud sql admin:
+gcloud auth application-default login
+
+gcloud config list
+- view current account and project
+
+gcloud components list
+
+it can ask to not use sdk credentials, but service account instead:
+gcloud auth activate-service-account --key-file="C:\Projects\Barrence\InjuryCheck\backend\pipeline\logic\injurycheck1-gcp-keyfile.json"
+- it activates the service accoutn for user:
+injurycheck1-account@injurycheck1.iam.gserviceaccount.com
+- this does not work when google.cloud is imported from python
+
+# Configure gcloud for your project
+gcloud config set project YOUR_PROJECT_ID
+
+terminate an instance:
+gcloud compute instances delete posekeypoints-vm
+- this deleted the instance, but now I can't create a new instance with the same name
+- use the console to terminate an instance
+
+move files to compute engine:
+- gsutil can only copy to/from storage
+- to copy to compute engine, can pull git repo from within the instance
+
+- enable debug so you can ssh into instance ?
+gcloud app --project injurycheck1 instances enable-debug
+
+
+run a deployment:
+cd "C:\Projects\InjuryCheck\CodeBase"
+gcloud app deploy app-flex.yaml --project injurycheck1 -q 
+--verbosity=debug
+
+
+gsutil ls -r gs://amplio-dev/
+
+
+---------------------------------------------------------------------------------------------------
+MOVE TO STORAGE WITH GSUTIL
+
+
+gsutil ls -L -b gs://amplio_dev/
+
+suppress the output: -q flag
+send in parallel: -m 
+
+gsutil cp [OBJECT_LOCATION] gs://[DESTINATION_BUCKET_NAME]/
+
+gsutil ls -L -b gs://openpose-contents/
+gsutil -m cp -r -n "C:\Projects\MicroServer\Source\openpose" gs://openpose-contents/
+
+
+gcloud compute instances list
+
+gcloud config set project amplio_dev
+gcloud config set project injurycheck1
+
+- delete all objects in bucket:
+gsutil -m rm gs://amplio-dev/**
+gsutil -m rm gs://video- src-frames/**
+
+
+- move from storage:
+gsutil -m cp -r gs://amplio-ai-stryd-regression/ C:\Projects\InjuryCheck\CodeBase\backend\pipeline\assets\
+
+cls
+gsutil -m cp -r gs://video-sources/2020-05-29/equinox gs://video-sources/equinox/2020-05-29
+
+gsutil -m rm gs://video-sources/2020-05-29/equinox/**
+
+gsutil -m rm gs://video-src-frames/**
+
+
+cls
+gsutil -m cp -r gs://amplio-dev/2020-06-26/front gs://amplio-internal/2020-06-26/front
+
+
+
+---------------------------------------------------------------------------------------------------
+SELF DEPLOY WEBSITE TO CE
+
+
+launch instance:
+- machine type: 4 cores
+- boot disk: ubuntu 18
+- boot disk: 20gb
+- networking -> network tags : pipeline-service
+- networking -> hostname : should use periods
+- networking -> default network : set external IP to reserved static IP
+	- can also assign static ip at the static ip page
+
+with instance in place, SSH in:
+python3 --version
+sudo ufw status
+sudo apt update
+sudo reboot
+cat /etc/os-release
+df
+
+
+install pip:
+sudo apt-get install -y python3-pip
+pip3 --version
+
+opencv dependency:
+sudo apt-get install -y libopencv-dev
+
+postgresql dependency:
+sudo apt-get install -y libpq-dev
+
+
+pull the webserver repo:
+cd ~
+git config --global credential.helper store
+git clone https://github.com/Amplio-ai/ResearchWebserver.git codebase
+ls -l ~/codebase
+
+cd ~/codebase && git pull
+sudo rm -r ~/codebase && cd ~
+
+
+install packages:
+cd ~/codebase
+sudo pip3 install -r requirements.txt
+pip3 freeze
+
+
+test django:
+cd ~/codebase/backend 
+python3 manage.py runserver
+python3 manage.py migrate
+
+
+GCP SDK AUTHENTICATION
+
+GCP python library is installed with pip
+
+authenticate the utility:
+- one time only
+- scopes are necessary or it errors out
+gcloud auth application-default login --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/userinfo.email  
+
+issue - can't find project id warning:
+- ok to ignore this
+- setting env variable doesn't work
+- setting default compute service account to owner doesn't work
+- enabling cloud resource manager API doesn't work
+
+
+gcloud config list
+gcloud config set project "injurycheck1"
+
+
+
+NGINX PROXY SERVER
+
+ngnix works as the proxy server:
+- proxy server is the frontline of the webserver stack
+- it caches and filters requests
+
+sudo apt-get install -y nginx
+nginx -v
+- nginx is now serving at the external IP, http://34.75.237.38
+- it gives the default page, to change it must set the custom config file
+
+setup the custom config file:
+- this is necessary because it provides the 'server' directive
+- link in blue means its working
+- must use asgi version for websockets
+
+sudo ln -s ~/codebase/backend/app_proj/server/nginx-webserver-asgi.conf /etc/nginx/sites-enabled/
+ls -l /etc/nginx/sites-enabled/
+
+modify the base nginx config file:
+- modify it to pick up the custom config, and not pick up the default
+- sed command must escape / and *
+
+sudo sed -i 's/include \/etc\/nginx\/conf.d\/\*.conf;/#include \/etc\/nginx\/conf.d\/\*.conf;/g' /etc/nginx/nginx.conf
+sudo sed -i 's/include \/etc\/nginx\/sites-enabled\/\*;/include \/etc\/nginx\/sites-enabled\/\*.\*;/g' /etc/nginx/nginx.conf
+
+nano /etc/nginx/nginx.conf
+nano /etc/nginx/sites-enabled/nginx-webserver-asgi.conf
+
+create the SSL certificate
+- instructions ahead
+
+restart the server with new config:
+sudo service nginx stop
+sudo service nginx configtest
+sudo service nginx start
+
+sudo netstat -tulpn | grep LISTEN
+sudo systemctl status nginx
+
+test the server:
+- it should be serving static files
+http://34.75.237.38/static/logo_icon.ico
+
+sudo rm /etc/nginx/sites-enabled/nginx-webserver-asgi.conf
+sudo sed -i 's/include \/etc\/nginx\/sites-enabled\/\*;/include \/etc\/nginx\/sites-enabled\/\*.\*;/g' /etc/nginx/nginx.conf
+
+
+changing sites-enabled/* to sites-enabled/*.* causes nginx to not work:
+- the config passes and it runs in systemctl status
+- but netstat shows it's not listening
+- it must need the server directive in etc/nginx/sites-enabled/default
+
+
+
+HTTP SERVER
+
+daphne is an http and websocket server designed for django channels
+gunicorn is an http server only
+
+first run with gunicorn wsgi:
+- requires absolute path for unix socket
+- this creates the socket, so restart nginx after launching this
+- run in daemon mode so it runs perpetually in the background
+cd ~/codebase/backend/app_proj
+sudo gunicorn --bind unix:/home/philip/codebase/backend/app_proj/server/socket.sock \
+--daemon server.wsgi:application
+
+sudo pkill gunicorn
+
+ls -l ~/codebase/backend/app_proj/server
+
+
+daphne with upstream socket:
+- daphne doesn't seem to connect with nginx with unix socket
+- must specify the host:port as defined in the upstream in nginx-webserver.conf
+cd ~/codebase/backend/app_proj
+sudo daphne -b 127.0.0.1 -p 2050 server.asgi:application
+
+create daphne system service:
+- this is the way to run daphne in background mode
+
+sudo ln -s ~/codebase/backend/app_proj/server/daphne.service /etc/systemd/system
+ls -l /etc/systemd/system
+nano /etc/systemd/system/daphne.service
+
+
+run tests:
+
+cd ~/codebase/backend/app_proj && sudo daphne -b 127.0.0.1 -p 2050 server.asgi:application
+
+sudo systemctl daemon-reload
+sudo systemctl stop daphne.service
+sudo systemctl start daphne.service
+sudo systemctl status daphne.service
+
+sudo netstat -tulpn | grep LISTEN
+
+
+/usr/bin/python3 /usr/local/bin/daphne -b 127.0.0.1 -p 2050 server.asgi:application
+
+
+REDIS SERVER
+
+used to manage the channel layers
+channels_redis package is used to interface channels and redis
+
+=> don't run the daphne service, instead run supervisor
+
+install utilities:
+
+sudo apt-get install -y redis-server supervisor
+
+pip3 install supervisor
+pip3 show supervisor
+
+link the supervisor conf:
+sudo ln -s  ~/codebase/backend/app_proj/server/supervisor.conf /etc/supervisor/conf.d/
+ls -l /etc/supervisor/conf.d/
+
+create the working folder:
+sudo mkdir /run/daphne/
+ls -l /run/
+
+
+run supervisor service:
+
+sudo service supervisor stop
+sudo service /home/philip/.local/lib/python3.6/site-packages/supervisor start
+
+cd /home/philip/.local/lib/python3.6/site-packages
+
+sudo supervisorctl reread
+sudo supervisorctl update
+
+sudo supervisorctl stop all
+sudo supervisorctl start all
+
+sudo netstat -tulpn | grep LISTEN
+sudo kill <pid>
+
+
+issue: supervisorctl doesn't serve the site, instead get 504 time out
+- netstat command shows that python is listening on 2050, not python3
+- when daphne service is run, netstat shows python3 listening on 2050
+- how to run supervisor in pip3 environment ?
+
+ => currently hacking it and running with daphne service
+ - daphne is not able to run multiple connections at once ?
+ 
+ 
+sudo netstat -tulpn | grep LISTEN
+sudo kill <pid>
+
+nano /etc/supervisor/conf.d/supervisor.conf
+
+with pip3 install requirements packages go here:
+ls /usr/local/lib/python3.6/dist-packages
+
+with just pip3 install packages go here:
+ls /home/philip/.local/lib/python3.6/site-packages
+
+
+SSL WITH CERTBOT
+
+run certbot:
+- it must be run on port 80
+- can stop nginx service for this
+
+sudo wget https://dl.eff.org/certbot-auto -O /usr/sbin/certbot-auto
+sudo chmod a+x /usr/sbin/certbot-auto
+
+sudo certbot-auto certonly --standalone -d research.amplio.ai
+- this asks for email and other questions
+- stop any processes from listening on port 80, the port must be open
+
+sudo ls -l /etc/letsencrypt/live/research.amplio.ai
+
+sudo snap install --classic certbot
+
+sudo certbot renew
+
+
+---------------------------------------------------------------------------------------------------
+DEPLOY WEBSITE TO GCP FLEXIBLE
+
+flexible plan can ssh into instance:
+- must enable something ?
+
+create project on console:
+- project-id shows up in url https://project-id.appspot.com
+- must enable cloud build on project
+
+copy static files to bucket:
+- must create bucket on console, or terminal
+
+
+* issue - how to point static files to storage?
+- gcp support says the docs have mistakes
+- they say you don't need a cname record, but the console error is pointing to https://injurycheck1.appspot.com/static/
+- I can't add a cname record to the default flexible domain 
+   - the default flexible domain doesn't show up under google domains
+
+
+gsutil -m cp -r -n "C:\Projects\InjuryCheck\CodeBase\backend\app_proj\static" gs://website-static/
+
+gsutil rm gs://website-static/**
+
+http://storage.googleapis.com/website-static/static/logo_icon.ico
+
+cd "C:\Projects\InjuryCheck\CodeBase"
+gcloud app deploy app-flex.yaml --project injurycheck1 -q 
+
+
+---------------------------------------------------------------------------------------------------
+DEPLOY WEBSITE TO GCP STANDARD
+
+standard service:
+- cannot run websockets
+- cannot attach GPU
+- cannot SSH into instance
+- does not support postgresql python adapter
+
+create project:
+- project contains the config
+
+enable APIs:
+- enable cloud build and cloud run
+- enable by searching for them
+- must have an account with billing access
+- requires credentials?
+
+add cloud ignore file:
+- .gcloudignore
+- add to root of repo
+
+add GCP configuration files:
+- add to root of repo
+- main.py, app.yaml
+
+create pip requirements file:
+pip freeze > "C:\Projects\Barrence\InjuryCheck\requirements.txt"
+
+deploy the project:
+cd "C:\Projects\Barrence\InjuryCheck"
+gcloud app deploy --project injurycheck1 -q
+- go to https://injurycheck1.appspot.com
+
+
+---------------------------------------------------------------------------------------------------
+

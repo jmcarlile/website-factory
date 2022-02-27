@@ -1,0 +1,228 @@
+REACT, SASS, HTML
+
+---------------------------------------------------------------------------------------------------
+COMMANDS
+
+
+cd "C:\Projects\Seed_Webserver\codebase\frontend"
+
+npm run start
+
+npm run build
+
+
+npm install
+
+
+---------------------------------------------------------------------------------------------------
+COMPONENT ARCHITECTURE
+
+/app-main/app-component
+   /layouts/menu-layout
+      /page-routes/<page>
+         /elements/<element>
+
+app-component
+- app mount point
+
+layouts
+- has the common code to all pages
+- this includes nav menu, background, etc
+
+page-routes
+- part of the site that actually changes with each route
+- responsible for axios calls
+- maintains the state of the page
+- can include zero or more elements
+
+elements
+- code that repeats in one or more pages
+- does not make axios calls, parent function-props sent in do that
+- does not maintain state, returns any user values to parent
+
+
+---------------------------------------------------------------------------------------------------
+STATE MANAGEMENT
+
+class vs functional components:
+- class component has state and lifecycle hooks
+- function component is stateless and more concise
+ => use class component when state is necessary, otherwise use function component
+
+global state:
+- global state is necessary for sharing data across different route-pages
+- redux was the first popular solution, but it's bloated with files and costs more than it provides
+- react context can be used
+	- but it suffers from forcing a re-render of all components linked to the global state when any such component is changed
+	- it's not an elegant solution
+- react-tracked package sounds good, but can only work with function components
+- go with reactn
+
+
+---------------------------------------------------------------------------------------------------
+HTML & CSS
+
+nav menu positioning
+- the left navigation sidebar should be fixed in place, regardless of page scrolling 
+- position:fixed doesn't work for this because it is removed from the elements' block context
+   - one way to fix is to have constant values, one for each display breakpoint
+- position:sticky works for this instead
+
+global css
+- the content-block component has styling that is general to all pages
+- the app-main/styles file has geenral meta-styling
+
+
+CSS LEVELS & NAMING
+
+page: 		the highest level class of a component
+			named after the component itself: admin-page 
+			
+pure col:	next div is a purecss grid divider
+panel:		panel class goes at the same level as pure col
+			can set the height of the panel
+			
+wrapper:	first division of upper grid
+group:		use this to combine children that juxtapose with others as a group
+			example is a form, or image
+block: 		division within a group
+format:		margins, padding, background for a low-level element
+
+
+---------------------------------------------------------------------------------------------------
+RESPONSIVENESS
+
+- site responsiveness is setup by the css framework chosen
+- this site only needs to be as small as ipad screen
+- Bootstrap and Foundation have many capabilities but are also heavy weight
+
+- going with purecss.com for responsive grid
+- provided by yahoo
+   - provides 5-based and 24-based grid column system
+   - lightweight library
+- was able to add xtra-large breakpoints
+   - go on pure's site and create any breakpoints desired
+   - wasn't able to import extension file well, had to copy it into node-modules manually
+   - this won't work in production ...
+
+
+GRID BREAKPOINTS
+
+class start-width
+all   0
+sm    568px
+md    768px    (48em)
+lg    1024px
+xl    1280px   (80em)
+------------
+xxl   1440px   (90em)
+xxxl  1760px   (110em)
+
+
+---------------------------------------------------------------------------------------------------
+FRONTEND PACKAGES
+
+
+npm install -g create-react-app
+- packages: create-react-app@3.4.0, another 98
+
+npm install reactn
+- low overhead global state
+- can access global state from class component
+
+npm install prop-types
+- enforce required props on react components
+
+npm install react-router-dom
+- adds routing capability for SPA
+
+npm install node-sass
+- adds ability to use SASS for CSS
+
+npm install purecss
+- used for responsive grid
+
+npm install axios
+- send ajax calls to server; using promises 
+- rxios brings in observables; which though powerful also adds more layers
+
+npm install react-use-websocket
+- keep alive websocket connections
+- a page will use axios or websockets, but not both
+
+npm install react-if
+- makes conditional formatting more readable
+- react-else-if isn't able to utilize delayed function evalutation 
+
+npm install react-table-6
+- formatted and paginated tables
+- don't use v7, massively different from 6
+
+npm install plotly.js react-plotlyjs
+- display plots developed on the backend
+
+
+npm install react-webcam
+- capture screenshots from multiple cameras
+
+
+---------------------------------------------------------------------------------------------------
+INTEGRATING DJANGO & REACT
+
+
+SETUP REACT
+
+install the basic packages
+
+cd "C:\Projects\InjuryCheck\CodeBase"
+create-react-app frontend
+
+cd "C:\Projects\InjuryCheck\CodeBase\frontend"
+npm run start
+- should present the default react screen at http://localhost:3000
+
+add to package.json:
+"proxy": "http://localhost:8000",
+
+cd "C:\Projects\InjuryCheck\CodeBase\frontend"
+npm run build
+- creates the build directory
+
+
+CONFIGURE 
+
+unpack the config and scripts folders:
+- need this to reorganize react file structure
+- create new folders: components
+- move files to other folders: index.js, app.js
+npm run eject
+
+why install webpack-bundle-tracker ?
+
+
+---------------------------------------------------------------------------------------------------
+REACT GENERAL
+
+
+enforcing component prop types:
+- this next mechanism requires typescript
+
+class MyProps {
+    url: string,
+}
+class MyComponent extends React.Component<MyProps>
+
+- otherwise use the default react prop type enforcement
+
+MyComponent.propTypes = {
+   optionalString: PropTypes.string,
+   optionalNumber: PropTypes.number,
+   optionalObject: PropTypes.object,
+   optionalBool: PropTypes.bool,
+   optionalArray: PropTypes.array,
+   optionalFunc: PropTypes.func,
+}
+
+
+---------------------------------------------------------------------------------------------------
+
