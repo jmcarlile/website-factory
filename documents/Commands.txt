@@ -4,10 +4,11 @@ FACTORY COMMANDS
 COMMANDS
 
 
-C:\Documents\Code\OpenStack\Current\WebsiteFactory\website-factory
 
 
 ---------------------------------------------------------------------------------------------------
+
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\website-factory
 
 git add .
 git commit -m "documents added"

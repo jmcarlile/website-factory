@@ -182,7 +182,5 @@ typings/
 
 ### CUSTOM
 
-elitehrv/
-stryd/
-zrt-lab/
+**/node_modules/
 
