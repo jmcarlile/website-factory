@@ -8,10 +8,10 @@ COMMANDS
 
 ---------------------------------------------------------------------------------------------------
 
-cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\website-factory
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase
 
 git add .
-git commit -m "readme updated"
+git commit -m "backend started"
 git pull
 git push
 

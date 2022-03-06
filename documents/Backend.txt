@@ -3,13 +3,6 @@ FACTORY BACKEND SERVER & LOGIC
 ---------------------------------------------------------------------------------------------------
 ENVIRONMENT & PACKAGES
 
-
-
-
-
-
-
-
 create virtual environment:
 cd C:\Documents\Code\OpenStack\Current\WebsiteFactory
 python -m venv v2
@@ -22,7 +15,7 @@ create requirements file:
 - keep the file manually, that way the versions can be preserved
 - then can install the environment locally with the requirements
 
-cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\website-factory\backend
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase\backend
 pip install -r requirements.txt
 
 check a package:
@@ -35,7 +28,81 @@ operating systems:
 
 
 ---------------------------------------------------------------------------------------------------
-PACKAGES INSTALLED
+
+
+
+
+
+CREATE PROJECT FILES
+
+python --version
+
+pip install django
+
+create the base project:
+- rename the parent folder to backend
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase
+django-admin startproject app_proj
+
+initialize the database:
+- starts the default sqlite db as a project file
+- creating a superuser is not necessary
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase\backend
+python manage.py migrate
+
+setup the basics:
+python manage.py startapp business_data
+- configure settings.py, add new django module
+- configure urls.py 
+
+run the server to test:
+python manage.py runserver
+- django should serve to http://127.0.0.1:8000/
+- ctrl+C to stop the server
+
+
+
+
+
+
+
+
+INTEGRATE WITH FRONTEND
+
+add options to settings.py
+- react app dir: the static folder that contains the build.js
+
+create base template index.html url:
+- in urls.py, add the empty url for the based react template
+
+move static files to prod static location
+- this is done after the frontend has been built
+- this is client side rendering because the react scripts are loaded on the client
+python manage.py collectstatic
+
+http://127.0.0.1:8000/static/amplio_logo.png
+
+http://127.0.0.1:8000/static/css/main.5f361e03.chunk.css
+
+
+
+
+
+
+
+INTEGRATE WITH JUPYTER
+
+cd "C:\Projects\Seed_Webserver\CodeBase\backend"
+python manage.py shell_plus --notebook
+- doesn't work for vscode
+
+add a kernel for each venv:
+- not necessary with django shell
+cd "C:\Projects\Seed_Webserver"
+ipython kernel install --user --name=v1
+
+
+
 
 
 
