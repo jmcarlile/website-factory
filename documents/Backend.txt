@@ -5,6 +5,35 @@ ENVIRONMENT & PACKAGES
 
 
 
+
+
+
+
+
+create virtual environment:
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory
+python -m venv v2
+
+enter virtual environment:
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory
+v2\Scripts\activate
+
+create requirements file:
+- keep the file manually, that way the versions can be preserved
+- then can install the environment locally with the requirements
+
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\website-factory\backend
+pip install -r requirements.txt
+
+check a package:
+pip show <package>
+which <package>
+
+operating systems:
+- windows: pip and pip3 are the same
+- linux: pip defaults to python2
+
+
 ---------------------------------------------------------------------------------------------------
 PACKAGES INSTALLED
 
