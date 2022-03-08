@@ -19,8 +19,9 @@ INSTALLED_APPS = [
     # installed packages
 	'rest_framework',
     'corsheaders',
+    'django_extensions',
     # custom modules
-    'business_data',
+    'business_module',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +55,7 @@ TEMPLATES = [
 
 # SERVER
 
-WSGI_APPLICATION = 'app_proj.wsgi.application'
+WSGI_APPLICATION = 'app_proj.server_hooks.wsgi_app'
 SECRET_KEY = 'django-insecure-6c7i*g#t2q1c&a%6nrvl&6g=awbg2$qlhoa0p_i6r=&#v!ji98'
 DEBUG = True
 ALLOWED_HOSTS = []

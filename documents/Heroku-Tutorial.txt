@@ -1,0 +1,57 @@
+HEROKU DEPLOYMENT TUTORIAL
+
+---------------------------------------------------------------------------------------------------
+
+cd C:\Documents\Code\OpenStack\Current\Heroku
+git clone https://github.com/heroku/python-getting-started.git
+cd python-getting-started
+
+cd C:\Documents\Code\OpenStack\Current\Heroku
+python3 -m venv venv
+.\venv\Scripts\activate
+pip install -r C:\Documents\Code\OpenStack\Current\Heroku\python-getting-started\requirements.txt
+pip list
+
+cd C:\Documents\Code\OpenStack\Current\Heroku\python-getting-started
+python manage.py collectstatic
+heroku local -f Procfile.windows
+http://localhost:5000
+
+
+---------------------------------------------------------------------------------------------------
+
+create the heroku app:
+- also creates the remote heroku branch
+* how to push to your remote? gits collide?
+- does pushing a new reqs file install new packages?
+
+heroku create tutorial-cfb
+
+git push heroku main
+
+heroku ps:scale web=1
+- web argument is number of dynos launched
+
+heroku open
+- can now visit site on browser
+- site name is tutorial-cfb.herokuapp.com, ok since its just an API
+
+heroku logs --tail
+- check for build errors?
+
+add ons are available
+- can get logs and notifications
+- can provision a database
+* is there a GUI for this, like jenkins?
+
+environment configuration:
+- use config vars to set environment variables securely
+
+websockets:
+- provision a reddis db ?
+
+
+---------------------------------------------------------------------------------------------------
+
+
+

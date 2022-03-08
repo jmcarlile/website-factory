@@ -14,8 +14,6 @@ We use Python Django with REST framework.
 The backend is also a full python computing engine capable of database maintenance, web scrappers, and machine learning.
 We use Jupyter with pandas and plotly.
 
-This project allows you to start a hackathon about 80 hours ahead of `npx create-react-app`.
-
 [Project Management Spreadsheet](https://docs.google.com/spreadsheets/d/1j07sT7-HGhPlajWFeYYBXIs4O6PKrztX-2PgnuVeJPA/edit#gid=1591015716)
 
 ### Replicating The Project

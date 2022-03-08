@@ -6,6 +6,12 @@ COMMANDS
 
 
 
+python manage.py makemigrations
+
+python manage.py migrate
+
+
+
 ---------------------------------------------------------------------------------------------------
 
 cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase

@@ -30,9 +30,6 @@ operating systems:
 ---------------------------------------------------------------------------------------------------
 
 
-
-
-
 CREATE PROJECT FILES
 
 python --version
@@ -51,7 +48,7 @@ cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase\backend
 python manage.py migrate
 
 setup the basics:
-python manage.py startapp business_data
+python manage.py startapp business_module
 - configure settings.py, add new django module
 - configure urls.py 
 
@@ -61,45 +58,15 @@ python manage.py runserver
 - ctrl+C to stop the server
 
 
-
-
-
-
-
-
-INTEGRATE WITH FRONTEND
-
-add options to settings.py
-- react app dir: the static folder that contains the build.js
-
-create base template index.html url:
-- in urls.py, add the empty url for the based react template
-
-move static files to prod static location
-- this is done after the frontend has been built
-- this is client side rendering because the react scripts are loaded on the client
-python manage.py collectstatic
-
-http://127.0.0.1:8000/static/amplio_logo.png
-
-http://127.0.0.1:8000/static/css/main.5f361e03.chunk.css
-
-
-
-
-
-
-
 INTEGRATE WITH JUPYTER
 
-cd "C:\Projects\Seed_Webserver\CodeBase\backend"
+cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase\backend
 python manage.py shell_plus --notebook
 - doesn't work for vscode
 
-add a kernel for each venv:
-- not necessary with django shell
-cd "C:\Projects\Seed_Webserver"
-ipython kernel install --user --name=v1
+
+---------------------------------------------------------------------------------------------------
+DEPLOYMENT
 
 
 
@@ -107,7 +74,6 @@ ipython kernel install --user --name=v1
 
 
 ---------------------------------------------------------------------------------------------------
-DEPLOYMENT
 
 
 
