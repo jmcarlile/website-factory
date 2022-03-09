@@ -13,16 +13,11 @@ class LegoSet(DB.models.Model):
     ThemeGroup = DB.models.TextField(null=True)
     Theme = DB.models.TextField(null=True)
     Subtheme = DB.models.TextField(null=True)
-    MainTag = DB.models.TextField(null=True)
     PriceStore = DB.models.FloatField(null=True)
     PriceNew = DB.models.FloatField(null=True)
     PriceUsed = DB.models.FloatField(null=True)
-    Volume = DB.models.FloatField(null=True)
-    Weight = DB.models.FloatField(null=True)
     PieceCount = DB.models.IntegerField(null=True)
     MinifigCount = DB.models.IntegerField(null=True)
-    RatingValue = DB.models.FloatField(null=True)
-    RatingVotes = DB.models.IntegerField(null=True)
 
     objects = UT.BaseManager()
 

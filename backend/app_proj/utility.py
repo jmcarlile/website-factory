@@ -18,7 +18,7 @@ class BaseManager(DB.models.Manager):
     def getOrNone(self, **kwargs):
         try:
             return self.get(**kwargs)
-        except ObjectDoesNotExist:
+        except DB.models.ObjectDoesNotExist:
             return None
 
 def GetTableCounts():
@@ -41,27 +41,71 @@ def GetTableCounts():
 
     return customTables
 
+def InsertSingle(module, table, entryDx):
 
-
-
-def InsertBulk(dataLs, table):
-    # modelLs = [LegoSet(**r) for r in dataLs]
-    # LegoSet.objects.bulk_create(modelLs)
-    modelLs = eval(f"[TB.{table}(**r) for r in dataLs]")
-    exec(f"TB.{table}.objects.bulk_create(modelLs, ignore_conflicts=True)")
-
-
-def InsertSingle(entryDx, table):
+    moduleObj = __import__(module)
+    folderObj = getattr(moduleObj, 'models')
+    classObj = getattr(folderObj, table)
+    
     try:
-        # newModel = LegoSet(**entryDx)
-        # newModel.save()
-        eval(f"")
+        newModel = classObj(**entryDx)
+        newModel.save()
+        print('inserted')
     except Exception as ex:
         print(ex)
-        print(entryDx)
-        print('')
+
+def InsertBulk(module, table, dataLs):
+
+    moduleObj = __import__(module)
+    folderObj = getattr(moduleObj, 'models')
+    classObj = getattr(folderObj, table)
+    
+    for dx in dataLs:
+        for k, v in dx.items():
+            if str(v) in ['nan', 'NaT']:
+                dx[k] = None
+
+    try:
+        modelLs = [classObj(**d) for d in dataLs]
+        classObj.objects.bulk_create(modelLs, ignore_conflicts=True)
+        print('bulk inserted')
+    except Exception as ex:
+        print(ex)
+
+def GetTableDictionary(module, table):
+    
+    moduleObj = __import__(module)
+    folderObj = getattr(moduleObj, 'models')
+    classObj = getattr(folderObj, table)
+    
+    selectLs = list(classObj.objects.values())
+
+    return selectLs
 
 
 
+
+def GetRow(module, table, parameters):
+
+    moduleObj = __import__(module)
+    folderObj = getattr(moduleObj, 'models')
+    classObj = getattr(folderObj, table)
+
+    result = classObj.objects.getOrNone(**parameters)
+
+    resultDx = {}
+    if result: resultDx = result.__dict__
+    return resultDx
+
+
+
+def DeleteTable(module, table):
+
+    moduleObj = __import__(module)
+    folderObj = getattr(moduleObj, 'models')
+    classObj = getattr(folderObj, table)
+
+    classObj.objects.all().delete()
+    print('table deleted')
 
 
