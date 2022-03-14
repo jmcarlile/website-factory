@@ -5,6 +5,12 @@ COMMANDS
 
 
 
+python manage.py runserver
+
+
+python manage.py shell_plus --notebook
+
+
 
 python manage.py makemigrations
 
@@ -17,7 +23,7 @@ python manage.py migrate
 cd C:\Documents\Code\OpenStack\Current\WebsiteFactory\codebase
 
 git add .
-git commit -m "backend started"
+git commit -m "API notebook created"
 git pull
 git push
 

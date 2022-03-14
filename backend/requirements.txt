@@ -7,3 +7,4 @@ jupyter
 django-extensions
 pandas
 plotly
+requests

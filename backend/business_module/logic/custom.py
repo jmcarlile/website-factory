@@ -1,8 +1,15 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 CUSTOM LOGIC
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+import pandas as PD
+import app_proj.utility as UT
 
 
-def MyFunction():
-    return 'lego data'
+def GetThemeGroups():
+    setsLs = UT.GetTableDictionary('business_module', 'LegoSet')
+    setsDf = PD.DataFrame(setsLs)
+    themeLs = list(setsDf['ThemeGroup'].unique())
+    return themeLs
+
+
 

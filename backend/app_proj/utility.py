@@ -82,9 +82,6 @@ def GetTableDictionary(module, table):
 
     return selectLs
 
-
-
-
 def GetRow(module, table, parameters):
 
     moduleObj = __import__(module)
@@ -97,8 +94,6 @@ def GetRow(module, table, parameters):
     if result: resultDx = result.__dict__
     return resultDx
 
-
-
 def DeleteTable(module, table):
 
     moduleObj = __import__(module)
@@ -107,5 +102,6 @@ def DeleteTable(module, table):
 
     classObj.objects.all().delete()
     print('table deleted')
+
 
 
